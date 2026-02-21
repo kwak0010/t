@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Memo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --accent: #6366f1;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Background Blobs */
+        .background-blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            filter: blur(80px);
+            opacity: 0.4;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            top: -100px;
+            right: -100px;
+            animation: move 20s infinite alternate;
+        }
+
+        .blob-2 {
+            width: 300px;
+            height: 300px;
+            background: #ec4899;
+            bottom: -50px;
+            left: -50px;
+            animation: move 15s infinite alternate-reverse;
+        }
+
+        @keyframes move {
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(100px, 100px);
+            }
+        }
+
+        /* App Container */
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 4rem 1.5rem;
+            z-index: 1;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Input Section */
+        .input-section {
+            margin-bottom: 3rem;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .input-card {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-card:focus-within {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            padding: 0.5rem;
+            outline: none;
+            resize: none;
+            font-family: inherit;
+        }
+
+        textarea::placeholder {
+            color: #52525b;
+        }
+
+        button#addBtn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
+            margin-left: 0.75rem;
+        }
+
+        button#addBtn:hover {
+            transform: scale(1.05);
+            background: #4f46e5;
+        }
+
+        button#addBtn:active {
+            transform: scale(0.95);
+        }
+
+        /* Memo Grid */
+        .memo-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .memo-card {
+            padding: 1.5rem;
+            position: relative;
+            animation: slideUp 0.4s ease-out;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .memo-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .memo-content {
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .memo-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .memo-date {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.2s, background 0.2s;
+        }
+
+        .memo-card:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <main class="app-container">
+        <header>
+            <h1>Minimal Memo</h1>
+            <p>Write your thoughts down.</p>
+        </header>
+
+        <section class="input-section">
+            <div class="input-card glass">
+                <textarea id="memoInput" placeholder="신선한 아이디어를 적어보세요..." rows="1"></textarea>
+                <button id="addBtn" aria-label="Add memo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <section id="memoList" class="memo-grid">
+            <!-- Memos will be injected here -->
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const memoInput = document.getElementById('memoInput');
+            const addBtn = document.getElementById('addBtn');
+            const memoList = document.getElementById('memoList');
+
+            // Auto-resize textarea
+            memoInput.addEventListener('input', () => {
+                memoInput.style.height = 'auto';
+                memoInput.style.height = memoInput.scrollHeight + 'px';
+            });
+
+            // Load memos from localStorage
+            let memos = JSON.parse(localStorage.getItem('memos')) || [];
+
+            const saveMemos = () => {
+                localStorage.setItem('memos', JSON.stringify(memos));
+            };
+
+            const renderMemos = () => {
+                memoList.innerHTML = '';
+                memos.forEach((memo, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'memo-card glass';
+
+                    const date = new Date(memo.id).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    card.innerHTML = `
+                        <div class="memo-content">${escapeHTML(memo.text)}</div>
+                        <div class="memo-footer">
+                            <span class="memo-date">${date}</span>
+                            <button class="delete-btn" onclick="deleteMemo(${index})" aria-label="Delete memo">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </div>
+                    `;
+                    memoList.appendChild(card);
+                });
+            };
+
+            const addMemo = () => {
+                const text = memoInput.value.trim();
+                if (text) {
+                    const newMemo = {
+                        id: Date.now(),
+                        text: text
+                    };
+                    memos.unshift(newMemo);
+                    saveMemos();
+                    renderMemos();
+                    memoInput.value = '';
+                    memoInput.style.height = 'auto';
+                }
+            };
+
+            window.deleteMemo = (index) => {
+                const card = memoList.children[index];
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    memos.splice(index, 1);
+                    saveMemos();
+                    renderMemos();
+                }, 200);
+            };
+
+            addBtn.addEventListener('click', addMemo);
+
+            memoInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    addMemo();
+                }
+            });
+
+            const escapeHTML = (str) => {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            };
+
+            renderMemos();
+        });
+    </script>
+</body>
+
+</html>
